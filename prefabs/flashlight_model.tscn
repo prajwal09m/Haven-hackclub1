@@ -1,0 +1,11 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://flash_light_psx__low_poly.glb" id="1_glb"]
+
+[node name="FlashlightModel" type="Node3D"]
+
+[node name="Pivot" type="Node3D" parent="."]
+transform = Transform3D(-37, 0, 0, 0, 37, 0, 0, 0, -37, 0, 0, 0)
+
+[node name="Model" parent="Pivot" instance=ExtResource("1_glb")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00445, -0.06646, 0.288792)

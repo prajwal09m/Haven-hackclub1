@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://8enntafoqtwe"]
+
+[ext_resource type="Script" uid="uid://cxt02k4qviuye" path="res://scripts/pickup_item.gd" id="1_pickup"]
+[ext_resource type="PackedScene" path="res://prefabs/flashlight_model.tscn" id="2_model"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_flash"]
+size = Vector3(0.5, 0.45, 0.6)
+
+[node name="FlashlightPickup" type="Area3D" unique_id=1624801519]
+script = ExtResource("1_pickup")
+item_id = "flashlight"
+display_name = "Flashlight"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1684524099]
+shape = SubResource("BoxShape3D_flash")
+
+[node name="FlashlightModel" parent="." unique_id=761059528 instance=ExtResource("2_model")]
+transform = Transform3D(1.4, 0, 0, 0, 1.4, 0, 0, 0, 1.4, 0, 0, 0)

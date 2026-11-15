@@ -64,6 +64,8 @@ const ENRAGE_MULTIPLIER := 2.0
 var vision_check_cooldown := 0.0
 const VISION_CHECK_INTERVAL := 0.15
 var last_can_see_target := false
+## When true the monster always knows where the player is and never gives up the chase.
+var always_hunt := false
 
 var active_knockback := Vector3.ZERO
 
@@ -78,13 +80,14 @@ func _ready() -> void:
 	# force active state for testing -- remove when desired
 	is_active = true
 	head_start_remaining = 0.0
+	# Record base senses BEFORE the await below (the sensory-variance code runs on the first physics frame).
+	base_detection_range = sight_detection_range
+	base_hearing_range = hear_range
 	
 	#wait for Godot's NavServer to sync
 	await get_tree().physics_frame
 	
 	roam_centre = global_position
-	base_detection_range = sight_detection_range
-	base_hearing_range = hear_range
 
 	if attack_zone:
 		attack_zone.body_entered.connect(_on_attack_zone_entered)
@@ -109,6 +112,13 @@ func _physics_process(delta: float) -> void:
 		if  has_node ("HearingRangeDebugSphere") and $HearingRangeDebugSphere.mesh:
 			$SightRangeDebugSphere.mesh.radius = hear_range
 	
+	if is_stunned():
+		velocity.x = 0.0
+		velocity.z = 0.0
+		_apply_gravity(delta)
+		move_and_slide()
+		return
+
 	if not is_active:
 		if head_start_remaining > 0.0:
 			head_start_remaining = maxf(0.0, head_start_remaining - delta)
@@ -138,13 +148,16 @@ func _physics_process(delta: float) -> void:
 
 	var distance = global_position.distance_to(target_node.global_position)
 
+	if always_hunt:
+		state = State.CHASE
+
 	match state:
 		State.WANDER:
 			wander(distance, delta)
 		State.CHASE:
 			var can_see = check_vision()
 			var in_range = distance <= lose_range
-			if can_see and in_range:
+			if always_hunt or (can_see and in_range):
 				chase_target(delta)
 			else:
 				state = State.SEARCH
@@ -313,3 +326,14 @@ func _play_random_ambient_sound() -> void:
 		ambient_audio_player.volume_db = randf_range(ambient_volume_min_db, ambient_volume_max_db)
 		ambient_audio_player.pitch_scale = randf_range(0.85, 1.15)
 		ambient_audio_player.play()
+
+
+# --- Stun (e.g. hit by a thrown item) ---
+var stunned_until := 0.0
+
+func stun(seconds: float) -> void:
+	stunned_until = Time.get_ticks_msec() / 1000.0 + seconds
+	velocity = Vector3.ZERO
+
+func is_stunned() -> bool:
+	return Time.get_ticks_msec() / 1000.0 < stunned_until

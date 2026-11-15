@@ -33,6 +33,8 @@ var base_camera_y := 0.0
 var _hovered_pickup: Area3D
 var _ui_open := false
 var _inventory_forced_pause := false
+## Set by story UIs (computer, documents, cutscenes) to freeze movement and free the mouse.
+var input_locked := false
 
 # 🎵 Footsteps
 @onready var footstep_player: AudioStreamPlayer3D = get_node_or_null("FootstepPlayer") as AudioStreamPlayer3D
@@ -85,10 +87,20 @@ func _process(delta: float) -> void:
 	camera.position.y = base_camera_y + headbob_offset
 
 func _physics_process(delta: float) -> void:
-	if _ui_open:
+	if _ui_open or input_locked:
 		velocity = Vector3.ZERO
 		return
-	is_sprinting = Input.is_action_pressed("sprint")
+	var moving := Vector2(velocity.x, velocity.z).length() > 0.1
+	var wants_sprint := Input.is_action_pressed("sprint") and moving
+	if stamina <= 0.0:
+		_exhausted = true
+	elif stamina >= 35.0:
+		_exhausted = false
+	is_sprinting = wants_sprint and not _exhausted
+	if is_sprinting:
+		stamina = maxf(stamina - 30.0 * delta, 0.0)
+	else:
+		stamina = minf(stamina + 9.0 * delta, max_stamina)
 	handle_movement()
 	handle_jump_and_gravity(delta)
 	handle_footsteps(delta)
@@ -124,6 +136,8 @@ func handle_jump_and_gravity(delta: float) -> void:
 		velocity.y += gravity * delta
 
 func _input(event: InputEvent) -> void:
+	if input_locked:
+		return
 	if event is InputEventMouseMotion and not _ui_open and not get_tree().paused:
 		_handle_mouse_look(event)
 	if event.is_action_pressed("interact"):
@@ -265,13 +279,13 @@ func _update_hover_prompt() -> void:
 		var pickup := _resolve_pickup(hit)
 		if pickup:
 			_hovered_pickup = pickup
-			prompt = "Press [E] to pick up %s" % pickup.get_display_name()
+			prompt = pickup.get_prompt() if pickup.has_method("get_prompt") else "Press [E] to pick up %s" % pickup.get_display_name()
 	if hover_label:
 		hover_label.visible = prompt != ""
 		hover_label.text = prompt
 
 func _resolve_pickup(target: Object) -> Area3D:
-	if target is Area3D:
+	if target is Area3D and (target as Area3D).has_method("collect"):
 		return target
 	if target is Node:
 		var node := target as Node
@@ -282,7 +296,7 @@ func _resolve_pickup(target: Object) -> Area3D:
 	return null
 
 func _update_mouse_mode() -> void:
-	var should_capture := not _ui_open and not get_tree().paused
+	var should_capture := not _ui_open and not input_locked and not get_tree().paused
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if should_capture else Input.MOUSE_MODE_VISIBLE
 
 func _validate_dependencies() -> void:
@@ -304,3 +318,39 @@ func _validate_dependencies() -> void:
 func _debug_log(message: String) -> void:
 	if OS.is_debug_build():
 		print("[Player] %s" % message)
+
+func set_input_locked(locked: bool) -> void:
+	input_locked = locked
+	if locked:
+		velocity = Vector3.ZERO
+		_hovered_pickup = null
+		if hover_label:
+			hover_label.visible = false
+	_update_mouse_mode()
+
+
+# --- Health (monsters call take_damage when they catch the player) ---
+signal damaged(amount: float, health_left: float)
+signal died
+
+@export var max_health := 100.0
+var health: float = 100.0
+var is_dead := false
+
+
+## Called by MonsterAI's attack zone. Knockback arguments are accepted for compatibility but unused.
+func take_damage(amount: float, _knockback_dir: Vector3 = Vector3.ZERO, _force: float = 0.0) -> void:
+	if is_dead:
+		return
+	health = maxf(health - amount, 0.0)
+	damaged.emit(amount, health)
+	if health <= 0.0:
+		is_dead = true
+		set_input_locked(true)
+		died.emit()
+
+
+# --- Stamina (sprinting drains it; at 0 you are exhausted until it recovers to 25) ---
+@export var max_stamina := 100.0
+var stamina: float = 100.0
+var _exhausted := false

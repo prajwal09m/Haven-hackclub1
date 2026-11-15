@@ -1,12 +1,14 @@
 [gd_scene format=3 uid="uid://b0j1hagydaq6r"]
 
 [ext_resource type="PackedScene" uid="uid://bxgquktut617g" path="res://scenes/player.tscn" id="1_dojpo"]
+[ext_resource type="PackedScene" path="res://scenes/test/monster_test.tscn" id="2_w8e1o"]
 [ext_resource type="PackedScene" uid="uid://cmut5yunpsrlx" path="res://prefabs/pickup_item.tscn" id="3_d8c7f"]
 [ext_resource type="Shader" uid="uid://br0xd1jieyblf" path="res://shaders/ps1_post_process.gdshader" id="3_df0lk"]
 [ext_resource type="PackedScene" uid="uid://dggpppu6fd3d6" path="res://scenes/levels/city.tscn" id="3_i6x8u"]
 [ext_resource type="AudioStream" uid="uid://bsa2khqvs3xi8" path="res://assets/audio/background/bg-loop.wav" id="4_3883t"]
 [ext_resource type="AudioStream" uid="uid://cehnkdpkipe4f" path="res://assets/audio/background/ambient.wav" id="5_lwl3g"]
 [ext_resource type="PackedScene" uid="uid://b38drs2hwh2yv" path="res://scenes/assets/bouncing_head.tscn" id="6_4bnrd"]
+[ext_resource type="Script" path="res://scripts/city_game.gd" id="9_citygame"]
 
 [sub_resource type="Sky" id="Sky_df0lk"]
 
@@ -32,7 +34,11 @@ shader = ExtResource("3_df0lk")
 shader_parameter/viewport_size = Vector2(640, 480)
 shader_parameter/virtual_resolution = Vector2(320, 240)
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_groundfill"]
+size = Vector3(420, 1, 420)
+
 [node name="CityLevel" type="Node3D" unique_id=1987927715]
+script = ExtResource("9_citygame")
 
 [node name="City" parent="." unique_id=274689763 instance=ExtResource("3_i6x8u")]
 
@@ -87,3 +93,9 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="GroundFill" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, -0.5, 40)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GroundFill"]
+shape = SubResource("BoxShape3D_groundfill")

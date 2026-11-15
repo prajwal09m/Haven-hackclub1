@@ -14,12 +14,9 @@ signal objective_completed(objective_id: String, objective_title: String)
 
 ## Initial objectives. Edit this list to add / rename / reorder objectives.
 ## Each entry: { "id": unique String, "title": display String }
-const DEFAULT_OBJECTIVES: Array[Dictionary] = [
-	{"id": "find_cabin", "title": "Find the cabin"},
-	{"id": "inspect_computer", "title": "Inspect the computer"},
-	{"id": "find_report", "title": "Find the missing-person report"},
-	{"id": "find_iron_gate", "title": "Locate the iron gate"},
-]
+## Haven's story objectives are registered per chapter by GameState (see StoryData.OBJECTIVES),
+## so this list is empty. Put any always-present objectives here.
+const DEFAULT_OBJECTIVES: Array[Dictionary] = []
 
 ## Enables the F9 dev shortcut (completes the next unfinished objective). Debug builds only.
 @export var enable_debug_shortcut: bool = true
@@ -46,7 +43,7 @@ func _unhandled_input(event: InputEvent) -> void:
 # ---------------------------------------------------------------- Public API
 
 ## Registers an objective. Returns false (and keeps the existing one) if the ID is already used.
-func register_objective(objective_id: String, objective_title: String) -> bool:
+func register_objective(objective_id: String, objective_title: String, already_completed: bool = false) -> bool:
 	if objective_id.is_empty():
 		push_warning("[ObjectiveManager] Cannot register an objective with an empty ID.")
 		return false
@@ -55,10 +52,18 @@ func register_objective(objective_id: String, objective_title: String) -> bool:
 		return false
 	_objective_order.append(objective_id)
 	_objective_titles[objective_id] = objective_title
-	_objective_completed[objective_id] = false
+	_objective_completed[objective_id] = already_completed # silently pre-completed: no signal
 	objective_registered.emit(objective_id)
 	objectives_changed.emit()
 	return true
+
+
+## Removes every objective (used when a new game / chapter list is built). Emits objectives_changed.
+func clear_objectives() -> void:
+	_objective_order.clear()
+	_objective_titles.clear()
+	_objective_completed.clear()
+	objectives_changed.emit()
 
 
 ## Completes an objective. Returns true only if this call completed it;

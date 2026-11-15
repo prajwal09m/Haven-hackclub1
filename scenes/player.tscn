@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://bxgquktut617g"]
+[gd_scene load_steps=11 format=3 uid="uid://bxgquktut617g"]
 
 [ext_resource type="Script" uid="uid://2i0hlkd3uxlo" path="res://scripts/player_controller.gd" id="1_3vyb7"]
 [ext_resource type="AudioStream" uid="uid://dtyfc3kaj2uos" path="res://assets/audio/ground/footstep_concrete.wav" id="2_g2els"]
@@ -6,6 +6,14 @@
 [ext_resource type="Script" uid="uid://tftdfpagcgmi" path="res://scripts/inventory.gd" id="4_dqkch"]
 
 [ext_resource type="PackedScene" uid="uid://c85c6pqy1ywf0" path="res://scenes/UI/objective_ui.tscn" id="5_objui"]
+
+[ext_resource type="PackedScene" path="res://scenes/UI/pickup_hud.tscn" id="6_pickuphud"]
+
+[ext_resource type="Script" path="res://scripts/flashlight.gd" id="7_flashscript"]
+
+[ext_resource type="PackedScene" path="res://prefabs/flashlight_model.tscn" id="8_flashmodel"]
+
+[ext_resource type="Script" path="res://scripts/item_thrower.gd" id="9_thrower"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_u8vuu"]
 
@@ -64,3 +72,23 @@ offset_right = 40.0
 offset_bottom = 23.0
 
 [node name="ObjectiveUi" parent="." instance=ExtResource("5_objui")]
+
+[node name="PickupHud" parent="." instance=ExtResource("6_pickuphud")]
+
+[node name="Flashlight" type="Node3D" parent="Camera3D"]
+script = ExtResource("7_flashscript")
+
+[node name="Viewmodel" parent="Camera3D/Flashlight" instance=ExtResource("8_flashmodel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.26, -0.2, -0.45)
+visible = false
+
+[node name="Beam" type="SpotLight3D" parent="Camera3D/Flashlight"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, -0.1, -0.3)
+visible = false
+light_color = Color(1, 0.93, 0.78, 1)
+light_energy = 3.0
+spot_range = 30.0
+spot_angle = 30.0
+
+[node name="ItemThrower" type="Node" parent="."]
+script = ExtResource("9_thrower")
