@@ -1,14 +1,3 @@
-[gd_scene format=3 uid="uid://ct5yflm5u2wpk"]
-
-[node name="MainScene" type="Node3D" unique_id=1391497008]
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=611817992]
-
-[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=1904264404]
-
-[node name="CruiserLocker" type="Area3D" parent="." unique_id=1949059101]
-
-[node name="Terminal" type="StaticBody3D" parent="." unique_id=1848188506]
-transform = Transform3D(-0.16194606, -0.9867996, 0, 0.9867996, -0.16194606, 0, 0, 0, 1, 0, 0, 0)
-
-[node name="Player" type="CharacterBody3D" parent="." unique_id=1764860940]
+version https://git-lfs.github.com/spec/v1
+oid sha256:9323a15e277f4cd32e9679b4d705c7c385e96028435288f82a825af83888d405
+size 610
