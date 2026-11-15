@@ -33,6 +33,7 @@ var base_camera_y := 0.0
 var _hovered_pickup: PickupItem
 var _ui_open := false
 var _inventory_forced_pause := false
+var _computer_open := false
 
 # 🎵 Footsteps
 @onready var footstep_player: AudioStreamPlayer3D = get_node_or_null("FootstepPlayer") as AudioStreamPlayer3D
@@ -85,7 +86,7 @@ func _process(delta: float) -> void:
 	camera.position.y = base_camera_y + headbob_offset
 
 func _physics_process(delta: float) -> void:
-	if _ui_open:
+	if _ui_open or _computer_open:
 		velocity = Vector3.ZERO
 		return
 	is_sprinting = Input.is_action_pressed("sprint")
@@ -124,14 +125,49 @@ func handle_jump_and_gravity(delta: float) -> void:
 		velocity.y += gravity * delta
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventMouseMotion and not _ui_open and not get_tree().paused:
+	if event is InputEventMouseMotion and not _ui_open and not _computer_open and not get_tree().paused:
 		_handle_mouse_look(event)
+	if _computer_open:
+		return  # computer UI handles its own input
 	if event.is_action_pressed("interact"):
 		_attempt_collect()
 	if event.is_action_pressed("inventory"):
 		_toggle_inventory_ui()
 	if event.is_action_pressed("pause"):
 		_handle_pause_toggle()
+
+# 🖱️ Left-click interaction (computer, etc.)
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed:
+		print("CLICK RECEIVED")
+	if _ui_open or _computer_open:
+		return
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_try_interact()
+
+func _try_interact() -> void:
+	var cam := get_viewport().get_camera_3d()
+	if cam == null:
+		print("No active camera")
+		return
+	var from := cam.global_position
+	var to := from + (-cam.global_transform.basis.z) * 3.0
+	var query := PhysicsRayQueryParameters3D.create(from, to)
+	query.collide_with_areas = true
+	query.collide_with_bodies = true
+	query.exclude = [get_rid()]
+	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	if hit:
+		print("Ray hit: ", hit.collider.name)
+		if hit.collider.has_method("interact"):
+			hit.collider.interact()
+
+# Called by the computer UI to freeze/unfreeze the player
+func set_ui_locked(locked: bool) -> void:
+	_computer_open = locked
+	if locked:
+		velocity = Vector3.ZERO
+	_update_mouse_mode()
 
 func _handle_mouse_look(event: InputEventMouseMotion) -> void:
 	rotate_y(deg_to_rad(-event.relative.x * mouse_sensitivity))
@@ -195,7 +231,6 @@ func _play_footstep() -> void:
 		footstep_player.pitch_scale = _footstep_rng.randf_range(footstep_pitch_min, footstep_pitch_max)
 		footstep_player.volume_db = footstep_volume_db
 		footstep_player.play()
-
 
 func _get_surface_type_underfoot() -> StringName:
 	if ground_ray and ground_ray.is_colliding():
@@ -282,7 +317,7 @@ func _resolve_pickup(target: Object) -> PickupItem:
 	return null
 
 func _update_mouse_mode() -> void:
-	var should_capture := not _ui_open and not get_tree().paused
+	var should_capture := not _ui_open and not _computer_open and not get_tree().paused
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if should_capture else Input.MOUSE_MODE_VISIBLE
 
 func _validate_dependencies() -> void:
