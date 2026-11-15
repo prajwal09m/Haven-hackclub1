@@ -1,0 +1,80 @@
+[gd_scene format=3 uid="uid://cfkp6p5ylk6oe"]
+
+[ext_resource type="Material" uid="uid://dqp157h2x2ayo" path="res://Materials/Sight_Range_Debug.tres" id="1_1f0kj"]
+[ext_resource type="Script" uid="uid://dgf3jnb1p1ncc" path="res://Scripts/enemy_ai.gd" id="1_afpow"]
+[ext_resource type="Material" uid="uid://b261udhfkq8fv" path="res://Materials/Hearing_Range_Debug.tres" id="2_afpow"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_wuruy"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_bpiyg"]
+material = ExtResource("1_1f0kj")
+radius = 20.0
+height = 38.142
+
+[sub_resource type="SphereMesh" id="SphereMesh_s2era"]
+radius = 20.0
+height = 38.142
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_lmc2l"]
+size = Vector3(11, 12.819672, 9.31781)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hitbox"]
+radius = 3.0585938
+height = 17.0
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_o8wfs"]
+radius = 2.0
+height = 13.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_86wgn"]
+size = Vector3(4, 2, 3)
+
+[node name="Monster" type="CharacterBody3D" unique_id=1706444998 groups=["maurice"]]
+script = ExtResource("1_afpow")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1032099486]
+shape = SubResource("CapsuleShape3D_wuruy")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="." unique_id=1642461693]
+simplify_path = true
+
+[node name="VisionRay" type="RayCast3D" parent="." unique_id=170581357]
+
+[node name="SightRangeDebugSphere" type="MeshInstance3D" parent="." unique_id=703398554]
+visible = false
+mesh = SubResource("SphereMesh_bpiyg")
+
+[node name="HearingRangeDebugSphere" type="MeshInstance3D" parent="." unique_id=1066171430]
+visible = false
+material_override = ExtResource("2_afpow")
+mesh = SubResource("SphereMesh_s2era")
+
+[node name="AttackZone" type="Area3D" parent="." unique_id=479453423]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AttackZone" unique_id=949438064]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4971771, -5.3352356)
+shape = SubResource("BoxShape3D_lmc2l")
+
+[node name="Hitbox" type="Area3D" parent="." unique_id=871566827]
+collision_mask = 0
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Hitbox" unique_id=1205509891]
+shape = SubResource("CapsuleShape3D_hitbox")
+
+[node name="AudioStreamPlayer3D" type="AudioStreamPlayer3D" parent="." unique_id=1534323491]
+attenuation_model = 3
+unit_size = 30.0
+max_distance = 100.0
+
+[node name="AmbienceAudioPlayer" type="AudioStreamPlayer3D" parent="." unique_id=424193862]
+
+[node name="Body" type="Node3D" parent="." unique_id=316038993]
+
+[node name="Body" type="MeshInstance3D" parent="Body" unique_id=1414583522]
+mesh = SubResource("CapsuleMesh_o8wfs")
+
+[node name="Head" type="MeshInstance3D" parent="Body" unique_id=1689290834]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.21494, -1.6310244)
+mesh = SubResource("BoxMesh_86wgn")

@@ -1,9 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://bxgquktut617g"]
+[gd_scene load_steps=7 format=3 uid="uid://bxgquktut617g"]
 
 [ext_resource type="Script" uid="uid://2i0hlkd3uxlo" path="res://scripts/player_controller.gd" id="1_3vyb7"]
 [ext_resource type="AudioStream" uid="uid://dtyfc3kaj2uos" path="res://assets/audio/ground/footstep_concrete.wav" id="2_g2els"]
 [ext_resource type="Script" uid="uid://dserwi4s6pjml" path="res://scripts/inventory_ui.gd" id="3_qhqgy"]
 [ext_resource type="Script" uid="uid://tftdfpagcgmi" path="res://scripts/inventory.gd" id="4_dqkch"]
+
+[ext_resource type="PackedScene" uid="uid://c85c6pqy1ywf0" path="res://scenes/UI/objective_ui.tscn" id="5_objui"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_u8vuu"]
 
@@ -60,3 +62,5 @@ layout_mode = 2
 [node name="HoverLabel" type="Label" parent="HUDHover"]
 offset_right = 40.0
 offset_bottom = 23.0
+
+[node name="ObjectiveUi" parent="." instance=ExtResource("5_objui")]

@@ -19,6 +19,10 @@ run/main_scene="uid://b0j1hagydaq6r"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
+[autoload]
+
+ObjectiveManager="*res://scripts/objective_manager.gd"
+
 [display]
 
 window/size/mode=3

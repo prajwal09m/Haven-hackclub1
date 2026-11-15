@@ -30,7 +30,7 @@ var base_camera_y := 0.0
 @onready var hover_label: Label = find_child("HoverLabel", true, false) as Label
 @onready var inventory_node: Inventory = find_child("Inventory", true, false) as Inventory
 @onready var inventory_ui: InventoryUI = find_child("InventoryUI", true, false) as InventoryUI
-var _hovered_pickup: PickupItem
+var _hovered_pickup: Area3D
 var _ui_open := false
 var _inventory_forced_pause := false
 
@@ -270,15 +270,15 @@ func _update_hover_prompt() -> void:
 		hover_label.visible = prompt != ""
 		hover_label.text = prompt
 
-func _resolve_pickup(target: Object) -> PickupItem:
-	if target is PickupItem:
+func _resolve_pickup(target: Object) -> Area3D:
+	if target is Area3D:
 		return target
 	if target is Node:
 		var node := target as Node
-		if node.get_parent() is PickupItem:
+		if node.get_parent() is Area3D:
 			return node.get_parent()
 	if target and target.has_method("collect") and target.has_method("get_display_name"):
-		return target as PickupItem
+		return target as Area3D
 	return null
 
 func _update_mouse_mode() -> void:

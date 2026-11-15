@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://cmut5yunpsrlx"]
+
+[ext_resource type="Script" uid="uid://cxt02k4qviuye" path="res://scripts/pickup_item.gd" id="1_if5ys"]
+[ext_resource type="PackedScene" uid="uid://dbvxe7mhyp71v" path="res://scenes/items/psx_tower_key__rusty_radio_tower_key.glb" id="2_h0ltu"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1hefu"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_if5ys"]
+
+[node name="PickupItem" type="Area3D" unique_id=1507134709]
+script = ExtResource("1_if5ys")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1676462357]
+shape = SubResource("BoxShape3D_1hefu")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1240480957]
+visible = false
+mesh = SubResource("BoxMesh_if5ys")
+
+[node name="Sketchfab_Scene" parent="." unique_id=1080816955 instance=ExtResource("2_h0ltu")]
+transform = Transform3D(-0.009248287, -0.99995726, 0, 0.99995726, -0.009248287, 0, 0, 0, 1, 0, 0, 0)
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
